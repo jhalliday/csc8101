@@ -34,11 +34,11 @@ import static org.junit.Assert.*;
  */
 public class DataReaderTest {
 
-    private final File dataDir = new File("/run/media/jhalli/4d0dafed-400e-48a3-9da1-92ed59d928f5/wc98/decoded/");
+    private final File dataDir = new File("/Local/Path/To/Log/File");
     // 1,352,794,346 lines, 13050324662bytes (13G), md5sum=b7089321366fe6f8131196b81d060c5d
     // first line: 34600 [30/Apr/1998:21:30:17 +0000] "GET /images/hm_bg.jpg HTTP/1.0" 200 24736
     // last line:  515626 [26/Jul/1998:21:59:55 +0000] "GET /english/images/team_hm_header.gif HTTP/1.1" 200 763
-    private final File logFile = new File(dataDir, "all-clean.gz");
+    private final File logFile = new File(dataDir, "loglite");
 
     private final DateFormat dateFormat = new SimpleDateFormat("[dd/MMM/yyyy:HH:mm:ss z]");
 
@@ -47,8 +47,7 @@ public class DataReaderTest {
 
         try (
                 final FileInputStream fileInputStream = new FileInputStream(logFile);
-                final GZIPInputStream gzipInputStream = new GZIPInputStream(fileInputStream);
-                final InputStreamReader inputStreamReader = new InputStreamReader(gzipInputStream);
+                final InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
                 final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)
         ) {
 

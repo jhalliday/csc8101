@@ -44,6 +44,17 @@ Hints:
 - LinkedHashMap#removeEldestEntry
 - HyperLogLog(0.05)
 
+Setup
+---
+When you clone this repository, you should ensure that you have maven installed on the system you are running with the shell command `mvn -v`.
+
+If you get the response `bash: mvn: command not found` then maven is not installed correctly on your system. Seek demonstrator help.
+
+Otherwise, download the [sample dataset](https://drive.google.com/file/d/0B069UO5fDWWpY2tfZ3BpcHdXT2c/edit?usp=sharing) and replace the path String in
+the class `DataReaderTest.java` (line: 37) with the location of the downloaded file.
+
+You may then run the shell command `mvn install` in order to build and test the project.
+
 Deliverables
 ---
 Java code to populate and query the database.  Code will be judged on correctness, maintainability and performance. Note the last two are not mutually exclusive, just hard to achieve at the same time.  Your code may use existing 3rd party libraries provided they are open source and you comply with the licence terms.
