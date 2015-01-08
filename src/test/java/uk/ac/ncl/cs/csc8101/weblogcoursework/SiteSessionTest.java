@@ -15,9 +15,13 @@ limitations under the License.
  */
 package uk.ac.ncl.cs.csc8101.weblogcoursework;
 
+import com.clearspring.analytics.stream.cardinality.CardinalityMergeException;
+import com.clearspring.analytics.stream.cardinality.HyperLogLog;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -77,5 +81,48 @@ public class SiteSessionTest {
         sessions.put("b", new SiteSession("b", 101 + SiteSession.MAX_IDLE_MS, "testURL"));
         assertEquals(1, sessions.size());
         assertEquals(session, expiredSession.get());
+    }
+
+    @Test
+    public void boundaryTest() {
+        SiteSession siteSession = new SiteSession("user1", 100, "testURL");
+        siteSession.update(100 + SiteSession.MAX_IDLE_MS, "testURL");
+    }
+
+    @Test
+    public void hllSerializationTest() throws IOException {
+
+        SiteSession siteSession = new SiteSession("user1", 100, "testURL");
+        siteSession.update(200, "testURL2");
+        siteSession.update(300, "testURL");
+        siteSession.update(400, "testURL2");
+
+        long inputCardinality = siteSession.getHyperLogLog().cardinality();
+
+        byte[] inputBytes = siteSession.getHyperLogLog().getBytes();
+        ByteBuffer byteBuffer = ByteBuffer.allocate(4+inputBytes.length);
+        byteBuffer.putInt(inputBytes.length);
+        byteBuffer.put(inputBytes);
+        byteBuffer.flip();
+
+        byte[] rebuiltBytes = new byte[byteBuffer.getInt()];
+        byteBuffer.get(rebuiltBytes);
+        HyperLogLog rebuiltHll = HyperLogLog.Builder.build(rebuiltBytes);
+
+        assertEquals(inputCardinality, rebuiltHll.cardinality());
+    }
+
+    @Test
+    public void mergeTest() throws CardinalityMergeException {
+
+        SiteSession siteSessionA = new SiteSession("user1", 100, "testURL-A");
+        siteSessionA.update(100, "testURL-common");
+        SiteSession siteSessionB = new SiteSession("user1", 100, "testURL-B");
+        siteSessionB.update(100, "testURL-common");
+
+        HyperLogLog hll = siteSessionA.getHyperLogLog();
+        hll.addAll(siteSessionB.getHyperLogLog());
+
+        assertEquals(3, hll.cardinality());
     }
 }

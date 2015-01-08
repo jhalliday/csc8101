@@ -21,6 +21,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -45,7 +46,7 @@ public class CassandraBasicIT {
 
         final Session bootstrapSession = cluster.connect();
         bootstrapSession.execute("CREATE KEYSPACE IF NOT EXISTS test WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1 }");
-        bootstrapSession.shutdown();
+        bootstrapSession.close();
 
         session = cluster.connect("test");
 
@@ -55,8 +56,8 @@ public class CassandraBasicIT {
 
     @AfterClass
     public static void staticCleanup() {
-        session.shutdown();
-        cluster.shutdown();
+        session.close();
+        cluster.close();
     }
 
     @Test
@@ -109,5 +110,28 @@ public class CassandraBasicIT {
         assertEquals(2, rows.size() );
         assertEquals("batch-item-one", rows.get(0).getString(0));
         assertEquals("batch-item-two", rows.get(1).getString(0));
+    }
+
+    @Test
+    public void insertAndReadBackList() {
+
+        final PreparedStatement insertPS = session.prepare("INSERT INTO test_data_table (k, v) VALUES (?, ?)");
+        final BatchStatement batchStatement = new BatchStatement(BatchStatement.Type.UNLOGGED);
+
+        batchStatement.add( new BoundStatement(insertPS).bind(101L, "batch-item-list-one"));
+        batchStatement.add( new BoundStatement(insertPS).bind(201L, "batch-item-list-two"));
+
+        session.execute(batchStatement);
+
+        final PreparedStatement selectPS = session.prepare("SELECT v FROM test_data_table WHERE k IN ?");
+        List<Long> list = new ArrayList<>(2);
+        list.add(101L);
+        list.add(201L);
+        ResultSet resultSet = session.execute( new BoundStatement(selectPS).bind( list ) );
+
+        List<Row> rows = resultSet.all();
+        assertEquals(2, rows.size() );
+        assertEquals("batch-item-list-one", rows.get(0).getString(0));
+        assertEquals("batch-item-list-two", rows.get(1).getString(0));
     }
 }

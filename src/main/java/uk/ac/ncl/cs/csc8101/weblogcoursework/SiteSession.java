@@ -20,7 +20,7 @@ import com.clearspring.analytics.stream.cardinality.HyperLogLog;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Unit tests for the SiteSession class
+ * Data structure for tracking a series of time ordered events.
  *
  * @author Jonathan Halliday (jonathan.halliday@redhat.com)
  * @since 2014-01

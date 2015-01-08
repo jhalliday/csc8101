@@ -20,8 +20,12 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Write pipelining tests for cassandra server v2 / CQL3 via datastax java-driver
@@ -51,7 +55,7 @@ public class CassandraPipelineIT {
 
         final Session bootstrapSession = cluster.connect();
         bootstrapSession.execute("CREATE KEYSPACE IF NOT EXISTS test WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1 }");
-        bootstrapSession.shutdown();
+        bootstrapSession.close();
 
         session = cluster.connect("test");
 
@@ -60,8 +64,8 @@ public class CassandraPipelineIT {
 
     @AfterClass
     public static void staticCleanup() {
-        session.shutdown();
-        cluster.shutdown();
+        session.close();
+        cluster.close();
     }
 
     @Test
@@ -69,20 +73,16 @@ public class CassandraPipelineIT {
 
         final PreparedStatement insertPS = session.prepare("INSERT INTO test_data_table (k, v) VALUES (?, ?)");
 
-        final int numberOfBatches = 10;
-        final int itemsPerBatch = 5;
+        final int numberOfOps = 10;
 
         final int maxOutstandingFutures = 4;
         final BlockingQueue<ResultSetFuture> outstandingFutures = new LinkedBlockingQueue<>(maxOutstandingFutures);
 
-        for(int i = 0; i < numberOfBatches; i++) {
+        for(int i = 0; i < numberOfOps; i++) {
 
-            final BatchStatement batchStatement = new BatchStatement(BatchStatement.Type.UNLOGGED);
-            for(int j = 0; j < itemsPerBatch; j++) {
-                batchStatement.add( new BoundStatement(insertPS).bind((long)((i*itemsPerBatch)+j), "batch-item-"+i+"-"+j));
-            }
+            final Statement statement = new BoundStatement(insertPS).bind((long)(1000+i), "item-"+i);
 
-            outstandingFutures.put(session.executeAsync(batchStatement));
+            outstandingFutures.put(session.executeAsync(statement));
 
             if(outstandingFutures.remainingCapacity() == 0) {
                 ResultSetFuture resultSetFuture = outstandingFutures.take();
@@ -94,5 +94,17 @@ public class CassandraPipelineIT {
             ResultSetFuture resultSetFuture = outstandingFutures.take();
             resultSetFuture.getUninterruptibly();
         }
+
+
+        final PreparedStatement selectPS = session.prepare("SELECT v FROM test_data_table WHERE k IN ?");
+        List<Long> list = new ArrayList<>(2);
+        list.add(1000L);
+        list.add(1001L);
+        ResultSet resultSet = session.execute( new BoundStatement(selectPS).bind( list ) );
+
+        List<Row> rows = resultSet.all();
+        assertEquals(2, rows.size() );
+        assertEquals("item-0", rows.get(0).getString(0));
+        assertEquals("item-1", rows.get(1).getString(0));
     }
 }
