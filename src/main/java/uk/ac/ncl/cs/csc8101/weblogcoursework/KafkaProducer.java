@@ -29,11 +29,12 @@ public class KafkaProducer {
 
     private static final File dataDir = new File("/tmp/");
     // 200m lines, 1,929,934,341 bytes (1.8G)
-    private static final File logFile = new File(dataDir, "all_clean_2015.gz");
+    private static final File logFile = new File(dataDir, "csc8101_logfile_2015.gz");
 
     public static void main(String[] args) throws Exception {
 
         // bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 16 --topic csc8101
+        // mvn exec:java -Dexec.mainClass=uk.ac.ncl.cs.csc8101.weblogcoursework.KafkaProducer
 
         final MetricRegistry metricRegistry = new MetricRegistry();
         final Meter meter = metricRegistry.meter("throughput");
