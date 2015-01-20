@@ -27,10 +27,9 @@ import java.util.zip.GZIPInputStream;
  */
 public class KafkaProducer {
 
-//    private static final File dataDir = new File("/run/media/jhalli/4d0dafed-400e-48a3-9da1-92ed59d928f5/wc98/decoded/");
-    private static final File dataDir = new File("/home/jhalli/IdeaProjects/ncl/");
-    // 1,352,794,346 lines; 13,050,324,662 bytes (13G), md5sum=b7089321366fe6f8131196b81d060c5d
-    private static final File logFile = new File(dataDir, "all-clean.gz");
+    private static final File dataDir = new File("/tmp/");
+    // 200m lines, 1,929,934,341 bytes (1.8G)
+    private static final File logFile = new File(dataDir, "all_clean_2015.gz");
 
     public static void main(String[] args) throws Exception {
 
@@ -52,13 +51,13 @@ public class KafkaProducer {
         properties.setProperty("producer.type", "async");
         properties.setProperty("batch.num.messages", "10000");
 
-        //properties.setProperty("queue.buffering.max.messages", "10000");
-        //properties.setProperty("send.buffer.bytes", "1048576");
-        //properties.setProperty("compression.codec", "gzip");
+//        properties.setProperty("queue.buffering.max.messages", "10000");
+//        properties.setProperty("send.buffer.bytes", "1048576");
+//        properties.setProperty("compression.codec", "gzip");
 
         final ProducerConfig producerConfig = new ProducerConfig(properties);
         final Producer<String, String> producer = new Producer<>(producerConfig);
-        final String topic = "csc8101x";
+        final String topic = "csc8101";
 
         try (
                 final FileInputStream fileInputStream = new FileInputStream(logFile);
