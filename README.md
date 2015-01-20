@@ -29,7 +29,6 @@ The log line format is: client_id timestamp "method url version" status size
 
 Hints:
 
-- Test your code on a subset of the input first - processing all the data may take hours
 - URLs are encoded and thus don't contain spaces. Timestamps contain exactly one space.
 - [dd/MMM/yyyy:HH:mm:ss z]
 - The database server is capable of handling multiple requests concurrently.
