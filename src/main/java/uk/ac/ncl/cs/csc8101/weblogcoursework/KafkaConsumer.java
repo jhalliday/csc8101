@@ -51,7 +51,7 @@ public class KafkaConsumer {
         final ConsumerConfig consumerConfig = new ConsumerConfig(properties);
 
         final String topic = "csc8101";
-        final int numThreads = Runtime.getRuntime().availableProcessors();
+        final int numThreads = 4;
 
         final ConsumerConnector consumerConnector = Consumer.createJavaConsumerConnector(consumerConfig);
         final Map<String, Integer> topicCountMap = new HashMap<>();
