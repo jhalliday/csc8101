@@ -34,7 +34,7 @@ import static org.junit.Assert.*;
  */
 public class DataReaderTest {
 
-    private static final File dataDir = new File("/tmp/");
+    private static final File dataDir = new File("/home/ubuntu/data/cassandra/");
     // 200m lines, 1,929,934,341 bytes (1.8G)
     private static final File logFile = new File(dataDir, "csc8101_logfile_2015.gz");
 
