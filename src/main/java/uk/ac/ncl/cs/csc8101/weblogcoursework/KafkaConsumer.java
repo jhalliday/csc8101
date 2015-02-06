@@ -78,6 +78,12 @@ public class KafkaConsumer {
         reporter.report();
         reporter.stop();
 
+        // we use the newer version of metrics, which shuts itself down cleanly. But...
+        // kafka still uses the old one and doesn't shut it down properly,
+        // leaving some metrics-meter-tick-thread lying around. So to avoid
+        // java.lang.IllegalThreadStateException from mvn:exec wrapper we terminate it explicitly here
+        com.yammer.metrics.Metrics.defaultRegistry().shutdown();
+
         // bin/kafka-run-class.sh kafka.tools.ConsumerOffsetChecker --zkconnect localhost:2181 --group myclient
     }
 }
